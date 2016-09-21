@@ -1,10 +1,14 @@
 package s3
 
 import (
+	"errors"
 	"fmt"
 	"io"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/kildevaeld/filestore"
@@ -12,8 +16,9 @@ import (
 )
 
 type Options struct {
-	AccessKey       []byte
-	SecretAccessKey []byte
+	AccessKey       string
+	SecretAccessKey string
+	Token           string
 	Bucket          string
 	Region          string
 	ACL             string
@@ -62,7 +67,6 @@ func (self *s3_impl) Set(key []byte, reader io.Reader, o *filestore.SetOptions) 
 
 func (self *s3_impl) Get(key []byte) (filestore.File, error) {
 
-	//i := s3.GetObjectInput{}
 	k := string(key)
 	out, err := self.client.GetObject(&s3.GetObjectInput{
 		Bucket: &self.o.Bucket,
@@ -81,8 +85,45 @@ func (self *s3_impl) Get(key []byte) (filestore.File, error) {
 
 func (self *s3_impl) Remove(key []byte) error {
 
-	return filestore.ErrNotFound
+	k := string(key)
+	_, e := self.client.DeleteObject(&s3.DeleteObjectInput{
+		Bucket: &self.o.Bucket,
+		Key:    &k,
+	})
 
+	return e
+
+}
+
+func New(o Options) (filestore.Store, error) {
+
+	if o.Bucket == "" {
+		return nil, errors.New("s3: No bucket")
+	}
+
+	var creds *credentials.Credentials
+
+	if string(o.AccessKey) == "" || o.SecretAccessKey == "" {
+		creds = credentials.NewEnvCredentials()
+	} else {
+		creds = credentials.NewStaticCredentials(o.AccessKey, o.SecretAccessKey, o.Token)
+	}
+
+	if creds == nil {
+		return nil, errors.New("s3: no auth")
+	}
+
+	cfg := aws.NewConfig().WithCredentials(creds)
+
+	if o.Region != "" {
+		cfg = cfg.WithRegion(o.Region)
+	}
+
+	client := s3.New(session.New(), cfg)
+
+	c := &s3_impl{client, o}
+
+	return c, nil
 }
 
 func init() {
@@ -96,13 +137,15 @@ func init() {
 			err = mapstructure.Decode(m, &options)
 		case Options:
 			options = m
-			//case *s3.S3:
-			//	return &s3_impl{m, }, nil
+		default:
+			return nil, errors.New("s3: options")
+
 		}
 		if err != nil {
 			return nil, err
 		}
-		return nil, nil
+
+		return New(options)
 	})
 
 }
