@@ -34,19 +34,23 @@ func (self *fs_impl) Set(key []byte, reader io.Reader, o *filestore.SetOptions) 
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	//defer file.Close()
 
 	_, err = io.Copy(file, reader)
-
+	file.Close()
 	return err
 
 }
 
 func (self *fs_impl) Get(key []byte) (filestore.File, error) {
 	fp := filepath.Join(self.path, string(key))
+
 	file, err := os.Open(fp)
+
 	if err == os.ErrNotExist {
 		return nil, filestore.ErrNotFound
+	} else if err != nil {
+		return nil, err
 	}
 	return file, nil
 }

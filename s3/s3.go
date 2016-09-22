@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/http"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -74,8 +75,13 @@ func (self *s3_impl) Get(key []byte) (filestore.File, error) {
 	})
 
 	if err != nil {
+		if e, ok := err.(awserr.RequestFailure); ok {
+			if e.StatusCode() == http.StatusNotFound {
+				return nil, filestore.ErrNotFound
+			}
+		}
 		if e, ok := err.(awserr.Error); ok {
-			fmt.Printf("%s\n", e)
+			return nil, fmt.Errorf("%s %s", e.Code(), e.Message())
 		}
 		return nil, err
 	}

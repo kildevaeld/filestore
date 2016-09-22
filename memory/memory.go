@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io"
 	"io/ioutil"
+	"sync"
 
 	"github.com/kildevaeld/filestore"
 )
@@ -14,6 +15,7 @@ type Options struct {
 
 type memory_impl struct {
 	files map[string][]byte
+	lock  sync.RWMutex
 }
 
 func (self *memory_impl) Set(key []byte, reader io.Reader, o *filestore.SetOptions) error {
@@ -21,13 +23,15 @@ func (self *memory_impl) Set(key []byte, reader io.Reader, o *filestore.SetOptio
 	if e != nil {
 		return e
 	}
-
+	self.lock.Lock()
 	self.files[string(key)] = b
-
+	self.lock.Unlock()
 	return nil
 }
 
 func (self *memory_impl) Get(key []byte) (filestore.File, error) {
+	self.lock.RLock()
+	defer self.lock.RUnlock()
 	if b, ok := self.files[string(key)]; ok {
 		return ioutil.NopCloser(bytes.NewReader(b)), nil
 	}
@@ -43,6 +47,10 @@ func (self *memory_impl) Remove(key []byte) error {
 
 	return filestore.ErrNotFound
 
+}
+
+func New() filestore.Store {
+	return &memory_impl{files: make(map[string][]byte)}
 }
 
 func init() {
