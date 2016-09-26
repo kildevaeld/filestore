@@ -32,7 +32,7 @@ type Options struct {
 }
 
 type Store interface {
-	Set(key []byte, reader io.Reader, o *SetOptions) error
+	Set(key []byte, reader io.Reader, o ...interface{}) error
 	//Stat(key []byte)
 	Get(key []byte) (File, error)
 	Remove(key []byte) error

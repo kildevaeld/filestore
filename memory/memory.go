@@ -18,7 +18,7 @@ type memory_impl struct {
 	lock  sync.RWMutex
 }
 
-func (self *memory_impl) Set(key []byte, reader io.Reader, o *filestore.SetOptions) error {
+func (self *memory_impl) Set(key []byte, reader io.Reader, o ...interface{}) error {
 	b, e := ioutil.ReadAll(reader)
 	if e != nil {
 		return e

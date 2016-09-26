@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/kildevaeld/dict"
 	"github.com/kildevaeld/filestore"
 	"github.com/mitchellh/mapstructure"
 )
@@ -26,12 +27,38 @@ type Options struct {
 	Cache           string
 }
 
+type SetOptions struct {
+	ACL          string
+	MimeType     string
+	CacheControl string
+}
+
 type s3_impl struct {
 	client *s3.S3
 	o      Options
 }
 
-func (self *s3_impl) Set(key []byte, reader io.Reader, o *filestore.SetOptions) error {
+func get_options(v interface{}) *SetOptions {
+	if v == nil {
+		return nil
+	}
+
+	switch o := v.(type) {
+	case dict.Map, map[string]interface{}:
+		var out SetOptions
+		err := mapstructure.Decode(o, &out)
+		if err != nil {
+			return &out
+		}
+	case *SetOptions:
+		return o
+	case SetOptions:
+		return &o
+	}
+	return nil
+}
+
+func (self *s3_impl) Set(key []byte, reader io.Reader, o ...interface{}) error {
 
 	uploader := s3manager.NewUploaderWithClient(self.client)
 
@@ -50,11 +77,17 @@ func (self *s3_impl) Set(key []byte, reader io.Reader, o *filestore.SetOptions) 
 		options.ACL = &self.o.ACL
 	}
 
-	if o != nil {
-		if o.MimeType != "" {
-			options.ContentType = &o.MimeType
+	so := get_options(o)
+	if so != nil {
+		if so.MimeType != "" {
+			options.ContentType = &so.MimeType
 		}
-
+		if so.ACL != "" {
+			options.ACL = &so.ACL
+		}
+		if so.CacheControl != "" {
+			options.CacheControl = &so.CacheControl
+		}
 	}
 
 	_, err := uploader.Upload(&options)

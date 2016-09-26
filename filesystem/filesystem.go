@@ -19,7 +19,7 @@ type fs_impl struct {
 	path string
 }
 
-func (self *fs_impl) Set(key []byte, reader io.Reader, o *filestore.SetOptions) error {
+func (self *fs_impl) Set(key []byte, reader io.Reader, o ...interface{}) error {
 
 	fp := filepath.Join(self.path, string(key))
 	dir := filepath.Dir(fp)
