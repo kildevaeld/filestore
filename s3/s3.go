@@ -31,6 +31,7 @@ type SetOptions struct {
 	ACL          string
 	MimeType     string
 	CacheControl string
+	Size         int64
 }
 
 type s3_impl struct {
@@ -54,6 +55,16 @@ func get_options(v interface{}) *SetOptions {
 		return o
 	case SetOptions:
 		return &o
+	case filestore.SetOptions:
+		return &SetOptions{
+			MimeType: o.MimeType,
+			Size:     o.Size,
+		}
+	case *filestore.SetOptions:
+		return &SetOptions{
+			MimeType: o.MimeType,
+			Size:     o.Size,
+		}
 	}
 	return nil
 }
