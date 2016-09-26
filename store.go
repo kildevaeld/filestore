@@ -27,8 +27,8 @@ type SetOptions struct {
 }
 
 type Options struct {
-	Driver        string
-	DriverOptions interface{}
+	Driver  string
+	Options interface{}
 }
 
 type Store interface {
@@ -57,5 +57,5 @@ func New(o Options) (Store, error) {
 		return nil, fmt.Errorf("No driver named: '%s'. Have you forgotton to import?", o.Driver)
 	}
 
-	return fn(o.DriverOptions)
+	return fn(o.Options)
 }
