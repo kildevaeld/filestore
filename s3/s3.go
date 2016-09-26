@@ -172,12 +172,12 @@ func init() {
 		var err error
 
 		switch m := o.(type) {
-		case map[string]interface{}:
+		case map[string]interface{}, dict.Map:
 			err = mapstructure.Decode(m, &options)
 		case Options:
 			options = m
 		default:
-			return nil, errors.New("s3: options")
+			return nil, errors.New("s3: No options")
 
 		}
 		if err != nil {
