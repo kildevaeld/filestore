@@ -8,6 +8,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/kildevaeld/filestore"
+	_ "github.com/kildevaeld/filestore/filesystem"
 )
 
 func TestS3(t *testing.T) {
@@ -25,6 +26,10 @@ func TestS3(t *testing.T) {
 	client, _ := New(Options{
 		Bucket: "boellefesten",
 		Region: s3.BucketLocationConstraintEuWest1,
+		Cache: filestore.Options{
+			Driver:  "filesystem",
+			Options: "./cache",
+		},
 	})
 
 	client.Set([]byte("/test/mig.txt"), bytes.NewReader([]byte("Hello, world")), &filestore.SetOptions{
@@ -37,7 +42,10 @@ func TestS3(t *testing.T) {
 	}
 
 	b, _ := ioutil.ReadAll(file)
-
-	client.Remove([]byte("/test/mig.txt"))
 	fmt.Printf("%s\n", b)
+
+	file, er = client.Get([]byte("/test/mig.txt"))
+	//file.Close()
+	client.Remove([]byte("/test/mig.txt"))
+
 }

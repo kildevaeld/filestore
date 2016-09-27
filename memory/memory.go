@@ -2,6 +2,7 @@ package memory
 
 import (
 	"bytes"
+	"errors"
 	"io"
 	"io/ioutil"
 	"sync"
@@ -37,6 +38,10 @@ func (self *memory_impl) Get(key []byte) (filestore.File, error) {
 	}
 
 	return nil, filestore.ErrNotFound
+}
+
+func (self *memory_impl) Stat(key []byte) (filestore.FileInfo, error) {
+	return nil, errors.New("not implemented")
 }
 
 func (self *memory_impl) Remove(key []byte) error {

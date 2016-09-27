@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"time"
 )
 
 var _stores map[string]func(o interface{}) (Store, error)
@@ -31,9 +32,15 @@ type Options struct {
 	Options interface{}
 }
 
+type FileInfo interface {
+	Name() string
+	Size() int64
+	ModTime() time.Time
+}
+
 type Store interface {
 	Set(key []byte, reader io.Reader, o ...interface{}) error
-	//Stat(key []byte)
+	Stat(key []byte) (FileInfo, error)
 	Get(key []byte) (File, error)
 	Remove(key []byte) error
 }

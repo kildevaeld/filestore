@@ -38,7 +38,7 @@ func New() filestore.Store {
 
 func init() {
 
-	filestore.Register("memory", func(o interface{}) (filestore.Store, error) {
+	filestore.Register("bolt", func(o interface{}) (filestore.Store, error) {
 		return &bolt_impl{files: make(map[string][]byte)}, nil
 	})
 

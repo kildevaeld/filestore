@@ -42,6 +42,16 @@ func (self *fs_impl) Set(key []byte, reader io.Reader, o ...interface{}) error {
 
 }
 
+func (self *fs_impl) Stat(key []byte) (filestore.FileInfo, error) {
+	fp := filepath.Join(self.path, string(key))
+	stat, err := os.Stat(fp)
+	if err == os.ErrNotExist {
+		return nil, err
+	}
+
+	return stat, err
+}
+
 func (self *fs_impl) Get(key []byte) (filestore.File, error) {
 	fp := filepath.Join(self.path, string(key))
 
