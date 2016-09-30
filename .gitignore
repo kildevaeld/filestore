@@ -2,3 +2,4 @@
 .vscode
 s3/aws.env
 s3/cache
+keyval/*.json
