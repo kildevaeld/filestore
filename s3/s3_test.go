@@ -1,7 +1,6 @@
 package s3
 
 import (
-	"bytes"
 	"fmt"
 	"io/ioutil"
 	"testing"
@@ -24,7 +23,7 @@ func TestS3(t *testing.T) {
 		ACL:    s3.BucketCannedACLPublicRead,
 	}}*/
 	client, _ := New(Options{
-		Bucket: "boellefesten",
+		Bucket: "livejazz-dev",
 		Region: s3.BucketLocationConstraintEuWest1,
 		Cache: filestore.Options{
 			Driver:  "filesystem",
@@ -32,11 +31,11 @@ func TestS3(t *testing.T) {
 		},
 	})
 
-	client.Set([]byte("/test/mig.txt"), bytes.NewReader([]byte("Hello, world")), &filestore.SetOptions{
+	/*client.Set([]byte("/test/mig.txt"), bytes.NewReader([]byte("Hello, world")), &filestore.SetOptions{
 		MimeType: "text/plain",
-	})
+	})*/
 
-	file, er := client.Get([]byte("/test/mig.txt"))
+	file, er := client.Get([]byte("croppings/2e33e9421f83076950c20a3c6d987b3e7dc41c4a.jpg"))
 	if er != nil {
 		t.Fatal(er)
 	}
@@ -44,8 +43,8 @@ func TestS3(t *testing.T) {
 	b, _ := ioutil.ReadAll(file)
 	fmt.Printf("%s\n", b)
 
-	file, er = client.Get([]byte("/test/mig.txt"))
+	//file, er = client.Get([]byte("/test/mig.txt"))
 	//file.Close()
-	client.Remove([]byte("/test/mig.txt"))
+	//client.Remove([]byte("/test/mig.txt"))
 
 }
