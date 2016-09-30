@@ -20,6 +20,12 @@ func getFileStore() (filestore.Store, error) {
 	}
 
 	if config.Driver == "" {
+		if err := viper.UnmarshalKey("filestore", &config); err != nil {
+			return nil, err
+		}
+	}
+
+	if config.Driver == "" {
 		return nil, errors.New("No driver selected")
 	}
 
