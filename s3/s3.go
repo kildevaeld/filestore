@@ -178,7 +178,7 @@ func (self *s3_impl) Get(key []byte) (filestore.File, error) {
 		go func() {
 			io.Copy(multi, out.Body)
 			out.Body.Close()
-			cached.CloseWriter()
+			cached.Close()
 			result.CloseWriter()
 		}()
 		return result, nil
