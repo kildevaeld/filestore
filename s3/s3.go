@@ -90,16 +90,18 @@ func (self *s3_impl) Set(key []byte, reader io.Reader, o ...interface{}) error {
 		options.ACL = &self.o.ACL
 	}
 
-	so := get_options(o)
-	if so != nil {
-		if so.MimeType != "" {
-			options.ContentType = &so.MimeType
-		}
-		if so.ACL != "" {
-			options.ACL = &so.ACL
-		}
-		if so.CacheControl != "" {
-			options.CacheControl = &so.CacheControl
+	if len(o) > 0 {
+		so := get_options(o[0])
+		if so != nil {
+			if so.MimeType != "" {
+				options.ContentType = &so.MimeType
+			}
+			if so.ACL != "" {
+				options.ACL = &so.ACL
+			}
+			if so.CacheControl != "" {
+				options.CacheControl = &so.CacheControl
+			}
 		}
 	}
 
